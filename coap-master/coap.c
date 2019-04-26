@@ -42,6 +42,7 @@ char *server   = NULL;
 char *sub_uri   = NULL;
 char *get_uri   = NULL;
 char *pub_uri   = NULL;
+char *crt_uri   = NULL;
 char *payload   = NULL;
 char *dis_uri   = NULL;
 
@@ -554,7 +555,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
     len++;
   }  
 
-  if(pub_uri) {
+  if(pub_uri || crt_uri) {
     ch_os = (struct coap_opt_s*) &buf[len];
     ch_os->delta = COAP_OPTION_MAX_AGE - last_option; /* COAP_OPTION_MAX_AGE = 14 */
     last_option = COAP_OPTION_MAX_AGE;
@@ -597,14 +598,16 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
   if(payload) {
     buf[len] = 0xff;
     len++;
-    strcpy(&buf[len], payload);
-    len += strlen(payload);
+    strcpy(&buf[len], "<topic44>;ct=0");
+    len += strlen("<topic44>;ct=0");
   }
+
   return len;
 }
 
 int process(void)
 {
+    
     struct sockaddr_in si_me, si_other;
     int s , recv_len, send_len, init = 0;
     socklen_t slen = sizeof(si_other);
@@ -674,6 +677,35 @@ int process(void)
 	  printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr), 
 		 ntohs(si_other.sin_port));
       }
+    }
+    else if(crt_uri) {
+      
+      si_other.sin_family = AF_INET;
+      si_other.sin_port = htons(port);
+      
+      if (inet_aton(host , &si_other.sin_addr) == 0) {
+	      terminate("inet_aton");
+      }
+
+      for (i = 0; i < MAX_TOKEN_LEN; i++)
+        tok[i] = rand();
+      tkl = 2;
+      
+      send_len = do_packet(buf, COAP_TYPE_CON, COAP_POST, crt_uri, NULL, ct, payload, tkl, tok, 0,0);
+      
+      if(send_len) {
+        if(debug & D_COAP_PKT)
+	        dump_pkt((struct coap_hdr*)buf, send_len, "pub");
+
+        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
+	        terminate("sendto()");
+	      }
+
+        if(debug & D_COAP_PKT)
+          printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+        
+      }
+
     }
     else if(sub_uri) {
       si_other.sin_family = AF_INET;
@@ -751,7 +783,7 @@ int process(void)
 	memcpy(tok, &buf[4], co->tkl);
 
 
-      if((co->type == COAP_TYPE_ACK))
+      if(co->type == COAP_TYPE_ACK)
 	printf("%s %d\n", response(co->code), co->code);
 
       
@@ -876,6 +908,11 @@ int main(int ac, char *av[])
       pub_uri = av[++i];
       payload = av[++i];
     }
+    else if (strncmp(av[i], "-crt", 4) == 0) {
+      host = av[++i];
+      crt_uri = av[++i];
+      payload = av[++i];
+    }
     else if (strncmp(av[i], "-get", 4) == 0) {
       host = av[++i];
       get_uri = av[++i];
@@ -892,7 +929,7 @@ int main(int ac, char *av[])
       background = 1;
   }
 
-  if(!sub_uri && !pub_uri && !dis_uri && !get_uri)
+  if(!sub_uri && !pub_uri && !dis_uri && !get_uri && !crt_uri)
     server = "enabled\n";
 
   
@@ -912,6 +949,7 @@ int main(int ac, char *av[])
     printf("DEBUG dis_uri=%s\n", dis_uri);
     printf("DEBUG sub_uri=%s\n", sub_uri);
     printf("DEBUG pub_uri=%s\n", pub_uri);
+    printf("DEBUG crt_uri=%s\n", crt_uri);
     printf("DEBUG get_uri=%s\n", get_uri);
   }
 
