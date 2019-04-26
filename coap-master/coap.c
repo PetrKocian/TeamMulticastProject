@@ -751,7 +751,7 @@ int process(void)
 	memcpy(tok, &buf[4], co->tkl);
 
 
-      if((co->type == COAP_TYPE_ACK))
+      if(co->type == COAP_TYPE_ACK)
 	printf("%s %d\n", response(co->code), co->code);
 
       
