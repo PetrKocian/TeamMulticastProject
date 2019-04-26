@@ -53,3 +53,4 @@ dkms.conf
 .vscode/
 coap-master/coap
 coap-master/coap.dat
+coap-master/.DS_Store

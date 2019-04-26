@@ -3,8 +3,8 @@
  * Created : 2017-02-09
  */
 #include <stdio.h>
-#include <string.h> 
-#include <stdlib.h> 
+#include <string.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -146,7 +146,7 @@ int32_t max_age = 60; /* We use default */
 
 struct udp_hdr {
  unsigned short int sport;
- unsigned short int dport;/* default mode */ 
+ unsigned short int dport;/* default mode */
  unsigned short int len;
  unsigned short int csum;
 };
@@ -172,7 +172,7 @@ struct coap_hdr {
    |1 1 1 1 1 1 1 1|    Payload (if any) ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                Figure 7: Message Format from RFC 8323 
+                Figure 7: Message Format from RFC 8323
 */
 
 /* Token handling */
@@ -249,7 +249,7 @@ void usage(void)
   printf(" -sub host uri  -- subscribe\n");
   printf(" -pub host uri  -- publish\n");
   printf(" -get host uri  -- get\n");
-  
+
   printf("\nExample 1 -- coap discover:\n coap -dis 192.16.125.232 .well-known/core\n");
   printf("\nExample 2 -- pubsub discover:\n coap -dis 192.16.125.232 .well-known/core?rt=core.ps\n");
   printf("\nExample 3 -- subscribe a topic:\n coap -sub 192.16.125.232  ps/fcc23d0000017f97/topic1\n");
@@ -277,8 +277,8 @@ void print_date(char *datebuf)
 
   if(date) {
 	  sprintf(buf, "%04d-%02d-%02d %2d:%02d:%02d ",
-		  tp->tm_year+1900, tp->tm_mon+1, 
-		  tp->tm_mday, tp->tm_hour, 
+		  tp->tm_year+1900, tp->tm_mon+1,
+		  tp->tm_mday, tp->tm_hour,
 		  tp->tm_min, tp->tm_sec);
 	  strcat(datebuf, buf);
   }
@@ -295,23 +295,23 @@ void dump_pkt(struct coap_hdr *ch, int len, char *info)
   unsigned ii, opt = 0, old_opt = 0;
 
   printf("DUMP at %s HEAD lengh=%d\n", info, len);
-  
-  printf(" Hex:\n"); 
+
+  printf(" Hex:\n");
   for(i = 0; i < len; i++) {
-    if(!i) 
+    if(!i)
       printf("[%3d]", i);
 
     printf(" %02x", d[i] & 0xFF);
-    
+
     if(! ((i+1)%16) )
       printf("\n[%3d]", i);
   }
   printf("\n");
 
-  
+
   printf(" v=%u t=%u tkl=%u code=%u id=%x\n", ch->ver, ch->type, ch->tkl, ch->code, ch->id);
 
-  printf(" Token TKL=%d", ch->tkl); 
+  printf(" Token TKL=%d", ch->tkl);
   for(i = 0; i < ch->tkl; i++) {
     printf(" %02x ", d[i+4] & 0xFF);
   }
@@ -338,14 +338,14 @@ void dump_pkt(struct coap_hdr *ch, int len, char *info)
         opt += 269;
       }
       else if(opt == 15) {
-        printf(" Payload: "); 
+        printf(" Payload: ");
         printf("%s\n", &d[i+1]);
         break; //return;
       }
     }
     opt += old_opt;
-    
-    olen = (d[i]) & 0xF; 
+
+    olen = (d[i]) & 0xF;
     if(olen > 12 ) {
       if(olen == 13) {
         i++;
@@ -369,7 +369,7 @@ void dump_pkt(struct coap_hdr *ch, int len, char *info)
     if( 1 ) {
       if(opt == COAP_OPTION_URI_PATH) {
         printf("uri-path=");
-        for(ii = 1; ii <= olen; ii++) 
+        for(ii = 1; ii <= olen; ii++)
           printf("%c", d[ii+i]);
       }
       else if(opt == COAP_OPTION_CONTENT_FORMAT) {
@@ -379,12 +379,12 @@ void dump_pkt(struct coap_hdr *ch, int len, char *info)
       }
       else if(opt == COAP_OPTION_URI_QUERY) {
         printf("uri-query=");
-        for(ii = 1; ii <= olen; ii++) 
+        for(ii = 1; ii <= olen; ii++)
           printf("%c", d[ii+i]);
       }
       else if(opt == COAP_OPTION_OBSERVE) {
         printf("observe=");
-        for(ii = 1; ii <= olen; ii++) 
+        for(ii = 1; ii <= olen; ii++)
           printf("0x%02x", d[ii+i]);
       }
       else if(opt == COAP_OPTION_CONTENT_FORMAT) {
@@ -404,13 +404,13 @@ void dump_pkt(struct coap_hdr *ch, int len, char *info)
     old_opt = opt;
     i = i + olen;
   }
-  printf("DUMP END\n"); 
+  printf("DUMP END\n");
 }
 
 void parse_subscribe(struct coap_hdr *ch, int len, char *p)
 {
   int i;
-  char *d = (char *) ch; 
+  char *d = (char *) ch;
   unsigned opt = 0, old_opt = 0;
 
   for(i = 4 + (ch->tkl); i < len; i++) {
@@ -439,8 +439,8 @@ void parse_subscribe(struct coap_hdr *ch, int len, char *p)
       }
     }
     opt += old_opt;
-    
-    olen = (d[i]) & 0xF; 
+
+    olen = (d[i]) & 0xF;
     if(olen > 12 ) {
       if(olen == 13) {
         i++;
@@ -462,12 +462,12 @@ void parse_subscribe(struct coap_hdr *ch, int len, char *p)
     if( olen ) {
       if(opt == COAP_OPTION_URI_PATH) {
         unsigned ii;
-        for(ii = 1; ii <= olen; ii++) 
+        for(ii = 1; ii <= olen; ii++)
           *p++ =  d[ii+i];
       }
       else if(opt == COAP_OPTION_URI_QUERY) {
       unsigned ii;
-      for(ii = 1; ii <= olen; ii++) 
+      for(ii = 1; ii <= olen; ii++)
             *p++ =  d[ii+i];
             *p++ = ' ';
           }
@@ -482,9 +482,9 @@ void terminate(char *s)
     perror(s);
     exit(1);
 }
- 
+
 int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
-	      char *uri_query, int content, char *payload, unsigned char tkl, unsigned char *tok, 
+	      char *uri_query, int content, char *payload, unsigned char tkl, unsigned char *tok,
 	      unsigned char obsl, unsigned obsv)
 {
   int len = 0;
@@ -492,7 +492,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
   struct coap_hdr *ch_tx;
   struct coap_opt_s *ch_os;
   struct coap_opt_l *ch_ol;
-  
+
   ch_tx = (struct coap_hdr*) &buf[0];
   len = sizeof(struct coap_hdr);
   int last_option=0;
@@ -515,12 +515,12 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
     ch_os = (struct coap_opt_s*) &buf[len];
     ch_os->delta = COAP_OPTION_OBSERVE - last_option; /* COAP_OPTION_OBSERVE */
     last_option = COAP_OPTION_OBSERVE;
-    ch_os->len = obsl; 
+    ch_os->len = obsl;
     len++;
     buf[len] = obsv;
     len += obsl;
   }
-  
+
   if( uri ) {
     if(strlen(uri) <= 12) {
       ch_os = (struct coap_opt_s*) &buf[len];
@@ -541,7 +541,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
       strcpy(&buf[len], uri); /* Long opt */
       len += strlen(uri);
       if(debug & D_COAP_PKT)
-	      printf("LONG delta flg=%d , delta=%d, len=%d\n", ch_ol->flag, ch_ol->delta, ch_ol->len); 
+	      printf("LONG delta flg=%d , delta=%d, len=%d\n", ch_ol->flag, ch_ol->delta, ch_ol->len);
     }
   }
 
@@ -553,7 +553,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
     len++;
     buf[len] = content;
     len++;
-  }  
+  }
 
   if(pub_uri || crt_uri) {
     ch_os = (struct coap_opt_s*) &buf[len];
@@ -587,7 +587,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
 
   if(uri_query) {
     ch_os = (struct coap_opt_s*) &buf[len];
-    ch_os->delta = COAP_OPTION_URI_QUERY  - last_option; /* COAP_OPTION_URI_QUERY = 15 */ 
+    ch_os->delta = COAP_OPTION_URI_QUERY  - last_option; /* COAP_OPTION_URI_QUERY = 15 */
     last_option = COAP_OPTION_URI_QUERY;
     ch_os->len = strlen(uri_query);
     len++;
@@ -595,20 +595,27 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
     len += strlen(uri_query);
   }
 
-  /*TODO:payload replaced with "<topic44>;ct=0" to show it works, needs to be fixed*/
   if(payload) {
-    buf[len] = 0xff;
-    len++;
-    strcpy(&buf[len], "<topic44>;ct=0");
-    len += strlen("<topic44>;ct=0");
-  }
+        buf[len] = 0xff;
+        len++;
+        if(crt_uri){                                        // For CREATE command
+            char *pl;
+            asprintf(&pl,"%s%s%s","<",payload,">;ct=40");
+            strcpy(&buf[len], pl);
+            len += strlen(pl);
+        }
+        else{
+            strcpy(&buf[len], payload);
+            len += strlen(payload);
+        }
+    }
 
   return len;
 }
 
 int process(void)
 {
-    
+
     struct sockaddr_in si_me, si_other;
     int s , recv_len, send_len, init = 0;
     socklen_t slen = sizeof(si_other);
@@ -645,7 +652,7 @@ int process(void)
       if(send_len) {
         if(debug & D_COAP_PKT)
           dump_pkt((struct coap_hdr*)buf, send_len, "dis");
-	
+
         if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
           terminate("sendto()");
         }
@@ -667,21 +674,21 @@ int process(void)
       if(send_len) {
         if(debug & D_COAP_PKT)
           dump_pkt((struct coap_hdr*)buf, send_len, "pub");
-        
-        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, 
+
+        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other,
             slen) == -1)  {
           terminate("sendto()");
         }
         if(debug & D_COAP_PKT)
-          printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr), 
+          printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr),
           ntohs(si_other.sin_port));
       }
     }
     else if(crt_uri) {
-      
+
       si_other.sin_family = AF_INET;
       si_other.sin_port = htons(port);
-      
+
       if (inet_aton(host , &si_other.sin_addr) == 0) {
 	      terminate("inet_aton");
       }
@@ -689,9 +696,9 @@ int process(void)
       for (i = 0; i < MAX_TOKEN_LEN; i++)
         tok[i] = rand();
       tkl = 2;
-      
+
       send_len = do_packet(buf, COAP_TYPE_CON, COAP_POST, crt_uri, NULL, ct, payload, tkl, tok, 0,0);
-      
+
       if(send_len) {
         if(debug & D_COAP_PKT)
 	        dump_pkt((struct coap_hdr*)buf, send_len, "pub");
@@ -702,7 +709,7 @@ int process(void)
 
         if(debug & D_COAP_PKT)
           printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-        
+
       }
 
     }
@@ -712,16 +719,16 @@ int process(void)
       if (inet_aton(host , &si_other.sin_addr) == 0) {
 	      terminate("inet_aton");
       }
-      
+
       for (i = 0; i < MAX_TOKEN_LEN; i++)
 	      tok[i] = rand();
       tkl = 2;
       send_len = do_packet(buf, COAP_TYPE_CON, COAP_GET, sub_uri, NULL, TEXT_PLAIN, NULL, tkl, tok, 1,0);
-      
+
       if(send_len) {
         if(debug & D_COAP_PKT)
           dump_pkt((struct coap_hdr*)buf, send_len, "sub");
-        
+
         if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
           terminate("sendto()");
         }
@@ -733,16 +740,16 @@ int process(void)
       if (inet_aton(host , &si_other.sin_addr) == 0) {
 	      terminate("inet_aton");
       }
-      
+
       for (i = 0; i < MAX_TOKEN_LEN; i++)
 	      tok[i] = rand();
       tkl = 2;
       send_len = do_packet(buf, COAP_TYPE_CON, COAP_GET, get_uri, NULL, TEXT_PLAIN, NULL, tkl, tok, 0,0);
-      
+
       if(send_len) {
         if(debug & D_COAP_PKT)
           dump_pkt((struct coap_hdr*)buf, send_len, "get");
-        
+
         if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
           terminate("sendto()");
         }
@@ -761,7 +768,7 @@ int process(void)
       if(debug & D_COAP_PKT)
 	      printf("Got %d bytes from %s:%d\n", recv_len, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
 
-      co = (struct coap_hdr*) &buf[0]; 
+      co = (struct coap_hdr*) &buf[0];
 
       if(debug & D_COAP_PKT)
 	      dump_pkt(co, recv_len, "recv");
@@ -781,23 +788,23 @@ int process(void)
       if(co->type == COAP_TYPE_ACK)
       	printf("%s %d\n", response(co->code), co->code);
 
-      
+
       /* Simple CoAP pubsub state machinery */
 
       /* DISCOVER reply*/
       if((co->type == COAP_TYPE_CON) && (co->code == COAP_GET)) {
         send_len = do_packet(buf, COAP_TYPE_ACK, CONTENT_2_05, discover, NULL, APPLICATION_LINK_FORMAT,
                 broker_base_uri, co->tkl, tok,0,0);
-      }	
+      }
 
       if(sub_uri || get_uri)
 	      init = 1;
-      
+
       /* CREATE reply */
       if((co->type == COAP_TYPE_CON) && (co->code == COAP_POST)) {
         send_len = do_packet(buf, COAP_TYPE_ACK, CREATED_2_01, NULL, NULL, CONTENT_NOT_DEFINED, NULL, co->tkl, tok,0,0);
         init = 1;
-      }	
+      }
 
       /* SUBSCRIBE -- PUT OR POST reply */
       if(get_uri || sub_uri || ((co->type == COAP_TYPE_CON) && (co->code == COAP_PUT))) {
@@ -808,30 +815,30 @@ int process(void)
           continue;
         }
 
-        print_date(p); 
+        print_date(p);
         if(file_fd)
           write(file_fd, p, strlen(p));
-        if(!background) 
+        if(!background)
           printf("%s", p);
         memset((char *) &p, 0, sizeof(p));
 
         parse_subscribe(co, recv_len, p);
         p[strlen(p)] = '\n';
-        
+
         if(file_fd)
           write(file_fd, p, strlen(p));
-        
-        if(!background) 
+
+        if(!background)
           printf("%s", p);
 
-        if(! sub_uri) 
+        if(! sub_uri)
           send_len = do_packet(buf, COAP_TYPE_ACK, CHANGED_2_04, NULL, NULL, CONTENT_NOT_DEFINED, NULL, co->tkl, tok,0,0);
       }
 
       if(send_len) {
         if(debug & D_COAP_PKT)
           dump_pkt(co, send_len, "ack");
-        
+
         if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
           terminate("sendto()");
         }
@@ -844,20 +851,20 @@ int process(void)
 
       /* Parse discovery respone */
       if(dis_uri) {
-        print_date(p); 
+        print_date(p);
         if(file_fd)
           write(file_fd, p, strlen(p));
-        if(!background) 
+        if(!background)
           printf("%s", p);
         memset((char *) &p, 0, sizeof(p));
-            
+
         parse_subscribe(co, recv_len, p);
         p[strlen(p)] = '\n';
-        
+
         if(file_fd)
           write(file_fd, p, strlen(p));
-        
-        if(!background) 
+
+        if(!background)
           printf("%s", p);
         break;
       }
@@ -871,24 +878,24 @@ int process(void)
     return 0;
 }
 
-int main(int ac, char *av[]) 
+int main(int ac, char *av[])
 {
   int i;
   char *filename = LOGFILE;
-  
+
   for(i = 1; (i < ac) && (av[i][0] == '-'); i++)  {
 
-    if (strncmp(av[i], "-gmt", 3) == 0) 
+    if (strncmp(av[i], "-gmt", 3) == 0)
       gmt = 1;
-    else if (strncmp(av[i], "-h", 2) == 0) 
+    else if (strncmp(av[i], "-h", 2) == 0)
       usage();
-    else if (strncmp(av[i], "-ct", 3) == 0) 
+    else if (strncmp(av[i], "-ct", 3) == 0)
       ct = atoi(av[i++]);
-    else if (strncmp(av[i], "-ut", 3) == 0) 
+    else if (strncmp(av[i], "-ut", 3) == 0)
       utime = 1;
-    else if (strncmp(av[i], "-f", 2) == 0) 
+    else if (strncmp(av[i], "-f", 2) == 0)
       filename = av[++i];
-    else if (strncmp(av[i], "-ma", 3) == 0) 
+    else if (strncmp(av[i], "-ma", 3) == 0)
       max_age = atoi(av[++i]);
     else if (strncmp(av[i], "-dis", 4) == 0) {
       host = av[++i];
@@ -918,14 +925,14 @@ int main(int ac, char *av[])
     }
     else if (strncmp(av[i], "-p", 2) == 0)
       port = atoi(av[++i]);
-    else if (strncmp(av[i], "-b", 2) == 0) 
+    else if (strncmp(av[i], "-b", 2) == 0)
       background = 1;
   }
 
   if(!sub_uri && !pub_uri && !dis_uri && !get_uri && !crt_uri)
     server = "enabled\n";
 
-  
+
   /* Setup for some radom */
   srand((unsigned int)**main + (unsigned int)&ac + (unsigned int)time(NULL));
   srand(rand());
@@ -956,17 +963,17 @@ int main(int ac, char *av[])
 
   if(background) {
     int i;
-    if(getppid() == 1) 
+    if(getppid() == 1)
       return 0; /* Already a daemon */
 
     i = fork();
 
-    if (i < 0) 
+    if (i < 0)
       exit(1); /* error */
 
-    if (i > 0) 
+    if (i > 0)
       _exit(0); /* parent exits */
-  
+
     setsid(); /* obtain a new process group */
     for (i = getdtablesize(); i >= 0; --i) {
       if(i == file_fd) continue;
@@ -977,7 +984,7 @@ int main(int ac, char *av[])
     i = open("/dev/null",O_RDWR); dup(i); dup(i); /* handle standard I/O */
     umask(027); /* set newly created file permissions */
     chdir("/"); /* change running directory */
-    
+
     signal(SIGCHLD,SIG_IGN); /* ignore child */
   }
   process();
