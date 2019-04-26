@@ -56,7 +56,7 @@ typedef enum {
 
 /* CoAP requests */
 typedef enum {
-COAP_GET = 1,
+  COAP_GET = 1,
   COAP_POST,
   COAP_PUT,
   COAP_DELETE
@@ -177,7 +177,7 @@ struct coap_hdr {
 
 /* Token handling */
 #define MAX_TOKEN_LEN 8
- unsigned char tok[MAX_TOKEN_LEN];
+unsigned char tok[MAX_TOKEN_LEN];
 
 /* Option handling */
 struct coap_opt_s {
@@ -198,31 +198,31 @@ char *response(int code)
 
   switch(code) {
 
-  case  NO_ERROR : r = "NO_ERROR";  break;
-  case  CREATED_2_01 : r = "CREATED_2_01";  break;
-  case  DELETED_2_02 : r = "DELETED_2_02";  break;
-  case  VALID_2_03 : r = "VALID_2_03";  break;
-  case  CHANGED_2_04 : r = "CHANGED_2_04";  break;
-  case  CONTENT_2_05 : r = "CONTENT_2_05";  break;
-  case  CONTINUE_2_31 : r = "CONTINUE_2_31";  break;
-  case  BAD_REQUEST_4_00 : r = "BAD_REQUEST_4_00";  break;
-  case  UNAUTHORIZED_4_01 : r = "UNAUTHORIZED_4_01";  break;
-  case  BAD_OPTION_4_02 : r = "BAD_OPTION_4_02";  break;
-  case  FORBIDDEN_4_03 : r = "FORBIDDEN_4_03";  break;
-  case  NOT_FOUND_4_04 : r = "NOT_FOUND_4_04";  break;
-  case  METHOD_NOT_ALLOWED_4_05: r = "METHOD_NOT_ALLOWED_4_05";  break;
-  case  NOT_ACCEPTABLE_4_06 : r = "NOT_ACCEPTABLE_4_06";  break;
-  case  PRECONDITION_FAILED_4_12 : r = "PRECONDITION_FAILED_4_12";  break;
-  case  REQUEST_ENTITY_TOO_LARGE_4_13 : r = "REQUEST_ENTITY_TOO_LARGE_4_13";  break;
-  case  UNSUPPORTED_MEDIA_TYPE_4_15 : r = "UNSUPPORTED_MEDIA_TYPE_4_15";  break;
-  case  INTERNAL_SERVER_ERROR_5_00 : r = "INTERNAL_SERVER_ERROR_5_00";  break;
-  case  NOT_IMPLEMENTED_5_01 : r = "NOT_IMPLEMENTED_5_01";  break;
-  case  BAD_GATEWAY_5_02 : r = "BAD_GATEWAY_5_02";  break;
-  case  SERVICE_UNAVAILABLE_5_03  : r = "SERVICE_UNAVAILABLE_5_03";  break;
-  case  GATEWAY_TIMEOUT_5_04 : r = "GATEWAY_TIMEOUT_5_04";  break;
-  case  PROXYING_NOT_SUPPORTED_5_05 : r = "PROXYING_NOT_SUPPORTED_5_05";  break;
-  default:
-    r = "UNKNOWN";
+    case  NO_ERROR : r = "NO_ERROR";  break;
+    case  CREATED_2_01 : r = "CREATED_2_01";  break;
+    case  DELETED_2_02 : r = "DELETED_2_02";  break;
+    case  VALID_2_03 : r = "VALID_2_03";  break;
+    case  CHANGED_2_04 : r = "CHANGED_2_04";  break;
+    case  CONTENT_2_05 : r = "CONTENT_2_05";  break;
+    case  CONTINUE_2_31 : r = "CONTINUE_2_31";  break;
+    case  BAD_REQUEST_4_00 : r = "BAD_REQUEST_4_00";  break;
+    case  UNAUTHORIZED_4_01 : r = "UNAUTHORIZED_4_01";  break;
+    case  BAD_OPTION_4_02 : r = "BAD_OPTION_4_02";  break;
+    case  FORBIDDEN_4_03 : r = "FORBIDDEN_4_03";  break;
+    case  NOT_FOUND_4_04 : r = "NOT_FOUND_4_04";  break;
+    case  METHOD_NOT_ALLOWED_4_05: r = "METHOD_NOT_ALLOWED_4_05";  break;
+    case  NOT_ACCEPTABLE_4_06 : r = "NOT_ACCEPTABLE_4_06";  break;
+    case  PRECONDITION_FAILED_4_12 : r = "PRECONDITION_FAILED_4_12";  break;
+    case  REQUEST_ENTITY_TOO_LARGE_4_13 : r = "REQUEST_ENTITY_TOO_LARGE_4_13";  break;
+    case  UNSUPPORTED_MEDIA_TYPE_4_15 : r = "UNSUPPORTED_MEDIA_TYPE_4_15";  break;
+    case  INTERNAL_SERVER_ERROR_5_00 : r = "INTERNAL_SERVER_ERROR_5_00";  break;
+    case  NOT_IMPLEMENTED_5_01 : r = "NOT_IMPLEMENTED_5_01";  break;
+    case  BAD_GATEWAY_5_02 : r = "BAD_GATEWAY_5_02";  break;
+    case  SERVICE_UNAVAILABLE_5_03  : r = "SERVICE_UNAVAILABLE_5_03";  break;
+    case  GATEWAY_TIMEOUT_5_04 : r = "GATEWAY_TIMEOUT_5_04";  break;
+    case  PROXYING_NOT_SUPPORTED_5_05 : r = "PROXYING_NOT_SUPPORTED_5_05";  break;
+    default:
+      r = "UNKNOWN";
   }
   return r;
 }
@@ -466,13 +466,13 @@ void parse_subscribe(struct coap_hdr *ch, int len, char *p)
           *p++ =  d[ii+i];
       }
       else if(opt == COAP_OPTION_URI_QUERY) {
-	unsigned ii;
-	for(ii = 1; ii <= olen; ii++) 
-        *p++ =  d[ii+i];
-        *p++ = ' ';
-      }
-      old_opt = opt;
-      i = i + olen;
+      unsigned ii;
+      for(ii = 1; ii <= olen; ii++) 
+            *p++ =  d[ii+i];
+            *p++ = ' ';
+          }
+          old_opt = opt;
+          i = i + olen;
     }
   }
 }
@@ -508,7 +508,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
 
   if(tkl) {
     memcpy(&buf[4], tok, tkl);
-	len += tkl;
+	  len += tkl;
   }
 
   if( obsl ) {
@@ -541,7 +541,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
       strcpy(&buf[len], uri); /* Long opt */
       len += strlen(uri);
       if(debug & D_COAP_PKT)
-	printf("LONG delta flg=%d , delta=%d, len=%d\n", ch_ol->flag, ch_ol->delta, ch_ol->len); 
+	      printf("LONG delta flg=%d , delta=%d, len=%d\n", ch_ol->flag, ch_ol->delta, ch_ol->len); 
     }
   }
 
@@ -646,13 +646,11 @@ int process(void)
         if(debug & D_COAP_PKT)
           dump_pkt((struct coap_hdr*)buf, send_len, "dis");
 	
-        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, 
-            slen) == -1)  {
+        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
           terminate("sendto()");
         }
         if(debug & D_COAP_PKT)
-          printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr), 
-          ntohs(si_other.sin_port));
+          printf("Sent %d bytes to %s:%d\n", send_len, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
       }
     }
     else if(pub_uri) {
@@ -721,12 +719,12 @@ int process(void)
       send_len = do_packet(buf, COAP_TYPE_CON, COAP_GET, sub_uri, NULL, TEXT_PLAIN, NULL, tkl, tok, 1,0);
       
       if(send_len) {
-	if(debug & D_COAP_PKT)
-	  dump_pkt((struct coap_hdr*)buf, send_len, "sub");
-	
-	if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
-	  terminate("sendto()");
-	}
+        if(debug & D_COAP_PKT)
+          dump_pkt((struct coap_hdr*)buf, send_len, "sub");
+        
+        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
+          terminate("sendto()");
+        }
       }
     }
     else if(get_uri) {
@@ -745,8 +743,7 @@ int process(void)
         if(debug & D_COAP_PKT)
           dump_pkt((struct coap_hdr*)buf, send_len, "get");
         
-        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, 
-            slen) == -1)  {
+        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, slen) == -1)  {
           terminate("sendto()");
         }
       }
