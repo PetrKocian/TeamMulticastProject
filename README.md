@@ -5,3 +5,5 @@ https://www.kth.se/cos/research/nslab
 
 You can follow along our Project progress here:
 https://sites.google.com/view/team-multicast/home
+
+This project was moved to a new depository.
