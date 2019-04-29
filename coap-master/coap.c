@@ -711,7 +711,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
   if(payload) {
     buf[len] = 0xff;
     len++;
-    if(crt_uri){                                        
+    if(crt_uri){
       char *pl;
       asprintf(&pl,"%s%s%s","<",payload,">;ct=40");
       strcpy(&buf[len], pl);
@@ -727,7 +727,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
         if(payload) {
                 buf[len] = 0xff;
                 len++;
-                if(crt_uri) {                               // For CREATE command
+                if(crt_uri) {                               /* For CREATE command */
                         char *pl;
                         asprintf(&pl,"%s%s%s","<",payload,">;ct=40");
                         strcpy(&buf[len], pl);
