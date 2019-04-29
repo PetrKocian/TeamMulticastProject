@@ -491,115 +491,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
               char *uri_query, int content, char *payload, unsigned char tkl, unsigned char *tok,
               unsigned char obsl, unsigned obsv)
 {
-<<<<<<< HEAD
-        int len = 0;
 
-        struct coap_hdr *ch_tx;
-        struct coap_opt_s *ch_os;
-        struct coap_opt_l *ch_ol;
-
-        ch_tx = (struct coap_hdr*) &buf[0];
-        len = sizeof(struct coap_hdr);
-        int last_option=0;
-
-        ch_tx->ver = 1;
-        ch_tx->type = type;
-        ch_tx->tkl = tkl;
-        ch_tx->code = code;
-
-        if(tkl > MAX_TOKEN_LEN) {
-                terminate("CoAP token length err");
-        }
-
-        if(tkl) {
-                memcpy(&buf[4], tok, tkl);
-                len += tkl;
-        }
-
-        if( obsl ) {
-                ch_os = (struct coap_opt_s*) &buf[len];
-                ch_os->delta = COAP_OPTION_OBSERVE - last_option; /* COAP_OPTION_OBSERVE */
-                last_option = COAP_OPTION_OBSERVE;
-                ch_os->len = obsl;
-                len++;
-                buf[len] = obsv;
-                len += obsl;
-        }
-
-        if( uri ) {
-                if(strlen(uri) <= 12) {
-                        ch_os = (struct coap_opt_s*) &buf[len];
-                        ch_os->delta = COAP_OPTION_URI_PATH - last_option; /* COAP_OPTION_URI_PATH = 11 */
-                        last_option = COAP_OPTION_URI_PATH;
-                        ch_os->len = strlen(uri);
-                        len++;
-                        strcpy(&buf[len], uri); /* Short opt */
-                        len += strlen(uri);
-                }
-                else if(strlen(uri) > 12) {
-                        ch_ol = (struct coap_opt_l*) &buf[len];
-                        ch_ol->delta = COAP_OPTION_URI_PATH - last_option; /* COAP_OPTION_URI_PATH = 11 */
-                        last_option = COAP_OPTION_URI_PATH;
-                        ch_ol->flag = 13; /* 1 byte extension */
-                        ch_ol->len = strlen(uri) - 13;
-                        len += 2;
-                        strcpy(&buf[len], uri); /* Long opt */
-                        len += strlen(uri);
-                        if(debug & D_COAP_PKT)
-                                printf("LONG delta flg=%d , delta=%d, len=%d\n", ch_ol->flag, ch_ol->delta, ch_ol->len);
-                }
-        }
-
-        if(content != CONTENT_NOT_DEFINED) {
-                ch_os = (struct coap_opt_s*) &buf[len];
-                ch_os->delta = COAP_OPTION_CONTENT_FORMAT - last_option; /* COAP_OPTION_CONTENT_FORMAT = 12 */
-                last_option = COAP_OPTION_CONTENT_FORMAT;
-                ch_os->len = 1;
-                len++;
-                buf[len] = content;
-                len++;
-        }
-
-        if(pub_uri || crt_uri) {
-                ch_os = (struct coap_opt_s*) &buf[len];
-                ch_os->delta = COAP_OPTION_MAX_AGE - last_option; /* COAP_OPTION_MAX_AGE = 14 */
-                last_option = COAP_OPTION_MAX_AGE;
-                if(max_age <= 255) {
-                        ch_os->len = 1;
-                        len++;
-                        buf[len] = (unsigned char) max_age & 0xFF;
-                        len++;
-                }
-                else if(max_age <= 65536) {
-                        ch_os->len = 2;
-                        len++;
-                        buf[len] = (unsigned char) (max_age>>8);
-                        len++;
-                        buf[len] = (unsigned char) max_age & 0xFF;
-                        len++;
-                }
-                else {
-                        ch_os->len = 3;
-                        len++;
-                        buf[len] = (unsigned char) (max_age>>16);
-                        len++;
-                        buf[len] = (unsigned char) (max_age>>8);
-                        len++;
-                        buf[len] = (unsigned char) max_age & 0xFF;
-                        len++;
-                }
-        }
-
-        if(uri_query) {
-                ch_os = (struct coap_opt_s*) &buf[len];
-                ch_os->delta = COAP_OPTION_URI_QUERY  - last_option;/* COAP_OPTION_URI_QUERY = 15 */
-                last_option = COAP_OPTION_URI_QUERY;
-                ch_os->len = strlen(uri_query);
-                len++;
-                strcpy(&buf[len], uri_query); /* Short opt */
-                len += strlen(uri_query);
-        }
-=======
   int len = 0;
 
   struct coap_hdr *ch_tx;
@@ -722,23 +614,7 @@ int do_packet(char *buf, unsigned char type, unsigned char code, char *uri,
       len += strlen(payload);
     }
   }
->>>>>>> 951c8c29fcbd59ce3571562fffa22defc28588fb
 
-        if(payload) {
-                buf[len] = 0xff;
-                len++;
-                if(crt_uri) {                               /* For CREATE command */
-                        char *pl;
-                        asprintf(&pl,"%s%s%s","<",payload,">;ct=40");
-                        strcpy(&buf[len], pl);
-                        len += strlen(pl);
-                }
-                else{
-                        strcpy(&buf[len], payload);
-                        len += strlen(payload);
-                }
-        }
-        return len;
 }
 
 int process(void)
@@ -840,6 +716,80 @@ int process(void)
 
                 }
 
+
+      if(debug & D_COAP_PKT)
+	dump_pkt(co, recv_len, "recv");
+
+      if(co->ver != 1) {
+	terminate("CoAP version err");
+      }
+
+      if(co->tkl > MAX_TOKEN_LEN) {
+	terminate("CoAP token length err");
+      }
+
+      if(co->tkl)
+	memcpy(tok, &buf[4], co->tkl);
+
+
+      if(co->type == COAP_TYPE_ACK)
+	printf("%s %d\n", response(co->code), co->code);
+
+      
+      /* Simple CoAP pubsub state machinery */
+
+      /* DISCOVER reply*/
+      if((co->type == COAP_TYPE_CON) && (co->code == COAP_GET)) {
+	send_len = do_packet(buf, COAP_TYPE_ACK, CONTENT_2_05, discover, NULL, APPLICATION_LINK_FORMAT,
+			     broker_base_uri, co->tkl, tok,0,0);
+      }	
+
+      if(sub_uri || get_uri)
+	init = 1;
+      
+      /* CREATE reply */
+      if((co->type == COAP_TYPE_CON) && (co->code == COAP_POST)) {
+	send_len = do_packet(buf, COAP_TYPE_ACK, CREATED_2_01, NULL, NULL, CONTENT_NOT_DEFINED, NULL, co->tkl, tok,0,0);
+	init = 1;
+      }	
+
+      /* SUBSCRIBE -- PUT OR POST reply */
+      if(get_uri || sub_uri || ((co->type == COAP_TYPE_CON) && (co->code == COAP_PUT))) {
+
+	memset((char *) &p, 0, sizeof(p));
+
+	if(init == 0) {
+	  send_len = do_packet(buf, COAP_TYPE_RST, CHANGED_2_04, NULL, NULL, CONTENT_NOT_DEFINED, NULL, co->tkl, tok,0,0);
+	  continue;
+	}
+
+	print_date(p); 
+	if(file_fd)
+	  write(file_fd, p, strlen(p));
+	if(!background) 
+	  printf("%s", p);
+	memset((char *) &p, 0, sizeof(p));
+
+	parse_subscribe(co, recv_len, p);
+	p[strlen(p)] = '\n';
+	
+	if(file_fd)
+	  write(file_fd, p, strlen(p));
+	
+	if(!background) 
+	  printf("%s", p);
+
+	if(! sub_uri) 
+	  send_len = do_packet(buf, COAP_TYPE_ACK, CHANGED_2_04, NULL, NULL, CONTENT_NOT_DEFINED, NULL, co->tkl, tok,0,0);
+      }
+
+      if(send_len) {
+	if(debug & D_COAP_PKT)
+	  dump_pkt(co, send_len, "ack");
+	
+        if (sendto(s, buf, send_len, 0, (struct sockaddr*) &si_other, 
+		   slen) == -1)  {
+	  terminate("sendto()");
         }
         else if(sub_uri) {
                 si_other.sin_family = AF_INET;
